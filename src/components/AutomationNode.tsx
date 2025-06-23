@@ -4,7 +4,7 @@ import { Handle, Position } from '@xyflow/react';
 import { AutomationNode } from '../store/automationStore';
 import { useAutomationStore } from '../store/automationStore';
 import { Switch } from './ui/switch';
-import { Power } from 'lucide-react';
+import { Power, Settings } from 'lucide-react';
 
 interface Props {
   id: string;
@@ -35,15 +35,26 @@ const getNodeColor = (type: string, category: string, isActive: boolean) => {
 };
 
 const AutomationNodeComponent: React.FC<Props> = ({ id, data }) => {
-  const { toggleNodeActive } = useAutomationStore();
+  const { toggleNodeActive, openNodeSettings } = useAutomationStore();
   const colorClass = getNodeColor(data.type, data.category, data.isActive);
   
+  const handleNodeClick = (e: React.MouseEvent) => {
+    // Prevent opening settings when clicking on the switch
+    if ((e.target as HTMLElement).closest('[role="switch"]')) {
+      return;
+    }
+    openNodeSettings(id);
+  };
+  
   return (
-    <div className={`
-      px-4 py-3 rounded-2xl shadow-md border-2 min-w-[200px] max-w-[250px]
-      ${colorClass} text-white
-      hover:shadow-lg cursor-pointer relative
-    `}>
+    <div 
+      className={`
+        px-4 py-3 rounded-2xl shadow-md border-2 min-w-[200px] max-w-[250px]
+        ${colorClass} text-white
+        hover:shadow-lg cursor-pointer relative
+      `}
+      onClick={handleNodeClick}
+    >
       <Handle
         type="target"
         position={Position.Left}
@@ -57,6 +68,11 @@ const AutomationNodeComponent: React.FC<Props> = ({ id, data }) => {
           onCheckedChange={() => toggleNodeActive(id)}
           className="scale-75"
         />
+      </div>
+      
+      {/* Settings Icon */}
+      <div className="absolute top-2 right-10">
+        <Settings className="w-4 h-4 opacity-60 hover:opacity-100 transition-opacity" />
       </div>
       
       <div className="flex flex-col pt-4">

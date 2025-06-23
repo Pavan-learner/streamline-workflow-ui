@@ -16,6 +16,7 @@ import '@xyflow/react/dist/style.css';
 import { useAutomationStore } from '../store/automationStore';
 import AutomationNodeComponent from './AutomationNode';
 import NodeModal from './NodeModal';
+import NodeSettingsModal from './NodeSettingsModal';
 import Sidebar from './Sidebar';
 
 const nodeTypes = {
@@ -23,7 +24,16 @@ const nodeTypes = {
 };
 
 const AutomationBuilder: React.FC = () => {
-  const { nodes, edges, setNodes, setEdges, onConnect } = useAutomationStore();
+  const { 
+    nodes, 
+    edges, 
+    setNodes, 
+    setEdges, 
+    onConnect,
+    isNodeSettingsOpen,
+    selectedNodeId,
+    closeNodeSettings
+  } = useAutomationStore();
   const [localNodes, setLocalNodes, onNodesChange] = useNodesState([]);
   const [localEdges, setLocalEdges, onEdgesChange] = useEdgesState([]);
 
@@ -106,6 +116,11 @@ const AutomationBuilder: React.FC = () => {
         </ReactFlow>
 
         <NodeModal />
+        <NodeSettingsModal 
+          isOpen={isNodeSettingsOpen}
+          onClose={closeNodeSettings}
+          nodeId={selectedNodeId}
+        />
       </div>
     </div>
   );

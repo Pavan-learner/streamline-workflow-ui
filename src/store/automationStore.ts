@@ -19,6 +19,8 @@ interface AutomationStore {
   selectedCategory: string;
   nodeCounter: number;
   displayMode: 'vertical' | 'horizontal';
+  isNodeSettingsOpen: boolean;
+  selectedNodeId: string | null;
   
   setNodes: (nodes: AutomationNode[]) => void;
   setEdges: (edges: Edge[]) => void;
@@ -31,6 +33,9 @@ interface AutomationStore {
   onConnect: (connection: Connection) => void;
   saveFlow: () => string;
   loadFlow: (flowData: string) => void;
+  openNodeSettings: (nodeId: string) => void;
+  closeNodeSettings: () => void;
+  updateNodeSettings: (nodeId: string, updates: { label?: string; description?: string }) => void;
 }
 
 export const useAutomationStore = create<AutomationStore>((set, get) => ({
@@ -40,6 +45,8 @@ export const useAutomationStore = create<AutomationStore>((set, get) => ({
   selectedCategory: 'CRM',
   nodeCounter: 0,
   displayMode: 'vertical',
+  isNodeSettingsOpen: false,
+  selectedNodeId: null,
   
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
@@ -49,20 +56,21 @@ export const useAutomationStore = create<AutomationStore>((set, get) => ({
     const newNodeId = `node-${nodeCounter}`;
     
     // Calculate position based on display mode and existing nodes
-    let position = { x: 100, y: 100 };
+    let position = { x: 200, y: 100 };
     if (nodes.length > 0) {
-      const lastNode = nodes[nodes.length - 1];
       const { displayMode } = get();
       
       if (displayMode === 'vertical') {
+        // Center nodes horizontally, stack vertically
         position = {
-          x: lastNode.position.x,
-          y: lastNode.position.y + 150
+          x: 200,
+          y: 100 + (nodes.length * 180)
         };
       } else {
+        // Center nodes vertically, arrange horizontally
         position = {
-          x: lastNode.position.x + 250,
-          y: lastNode.position.y
+          x: 100 + (nodes.length * 280),
+          y: 200
         };
       }
     }
@@ -114,17 +122,17 @@ export const useAutomationStore = create<AutomationStore>((set, get) => ({
     const { nodes } = get();
     let updatedNodes = [...nodes];
     
-    // Rearrange existing nodes based on display mode
+    // Improved alignment for display modes
     updatedNodes = updatedNodes.map((node, index) => {
       if (mode === 'vertical') {
         return {
           ...node,
-          position: { x: 200, y: 100 + (index * 150) }
+          position: { x: 200, y: 100 + (index * 180) }
         };
       } else {
         return {
           ...node,
-          position: { x: 100 + (index * 250), y: 200 }
+          position: { x: 100 + (index * 280), y: 200 }
         };
       }
     });
@@ -148,6 +156,31 @@ export const useAutomationStore = create<AutomationStore>((set, get) => ({
     
     set((state) => ({
       edges: [...state.edges, newEdge],
+    }));
+  },
+  
+  openNodeSettings: (nodeId: string) => {
+    set({ isNodeSettingsOpen: true, selectedNodeId: nodeId });
+  },
+  
+  closeNodeSettings: () => {
+    set({ isNodeSettingsOpen: false, selectedNodeId: null });
+  },
+  
+  updateNodeSettings: (nodeId: string, updates: { label?: string; description?: string }) => {
+    set((state) => ({
+      nodes: state.nodes.map(node =>
+        node.id === nodeId
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                ...(updates.label && { label: updates.label }),
+                ...(updates.description !== undefined && { description: updates.description }),
+              }
+            }
+          : node
+      ),
     }));
   },
   
