@@ -1,41 +1,17 @@
 
 import React, { useState } from 'react';
 import { useAutomationStore } from '../store/automationStore';
-import { Plus, Download, Upload, Workflow, Zap, Settings, ChevronLeft, ChevronRight, Rows, Columns } from 'lucide-react';
+import { Plus, Workflow, Zap, Settings, ChevronLeft, ChevronRight, Rows, Columns } from 'lucide-react';
 import { Button } from './ui/button';
 
 const Sidebar: React.FC = () => {
   const { 
     openModal, 
-    saveFlow, 
-    loadFlow, 
     nodes, 
-    edges, 
     displayMode, 
     setDisplayMode 
   } = useAutomationStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [jsonInput, setJsonInput] = useState('');
-  const [showJsonInput, setShowJsonInput] = useState(false);
-
-  const handleSaveFlow = () => {
-    const flowData = saveFlow();
-    const blob = new Blob([flowData], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'automation-flow.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleLoadFlow = () => {
-    if (jsonInput.trim()) {
-      loadFlow(jsonInput);
-      setJsonInput('');
-      setShowJsonInput(false);
-    }
-  };
 
   const triggerCount = nodes.filter(node => node.data.type === 'trigger').length;
   const actionCount = nodes.filter(node => node.data.type === 'action').length;
@@ -127,57 +103,6 @@ const Sidebar: React.FC = () => {
           <Plus className="w-5 h-5" />
           {!isCollapsed && <span className="font-medium">Add Node</span>}
         </button>
-
-        {!isCollapsed && (
-          <>
-            <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Flow Actions</h3>
-              
-              <button
-                onClick={handleSaveFlow}
-                className="w-full p-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center space-x-2"
-              >
-                <Download className="w-4 h-4" />
-                <span>Export Flow</span>
-              </button>
-
-              <button
-                onClick={() => setShowJsonInput(!showJsonInput)}
-                className="w-full p-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center space-x-2"
-              >
-                <Upload className="w-4 h-4" />
-                <span>Import Flow</span>
-              </button>
-
-              {showJsonInput && (
-                <div className="space-y-2">
-                  <textarea
-                    value={jsonInput}
-                    onChange={(e) => setJsonInput(e.target.value)}
-                    placeholder="Paste your JSON flow data here..."
-                    className="w-full h-32 p-3 border border-gray-300 rounded-lg text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <button
-                    onClick={handleLoadFlow}
-                    className="w-full p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
-                  >
-                    Load Flow
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Node Count Summary */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">Flow Summary</h4>
-              <div className="text-sm text-gray-600 space-y-1">
-                <div>Total Nodes: {nodes.length}</div>
-                <div>Total Connections: {edges.length}</div>
-                <div>Active Nodes: {activeNodes}</div>
-              </div>
-            </div>
-          </>
-        )}
       </div>
     </div>
   );

@@ -39,17 +39,23 @@ const AutomationNodeComponent: React.FC<Props> = ({ id, data }) => {
   const colorClass = getNodeColor(data.type, data.category, data.isActive);
   
   const handleNodeClick = (e: React.MouseEvent) => {
-    // Prevent opening settings when clicking on the switch
-    if ((e.target as HTMLElement).closest('[role="switch"]')) {
+    // Prevent opening settings when clicking on the switch or settings icon
+    if ((e.target as HTMLElement).closest('[role="switch"]') || 
+        (e.target as HTMLElement).closest('.settings-icon')) {
       return;
     }
+    openNodeSettings(id);
+  };
+
+  const handleSettingsClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     openNodeSettings(id);
   };
   
   return (
     <div 
       className={`
-        px-4 py-3 rounded-2xl shadow-md border-2 min-w-[200px] max-w-[250px]
+        px-4 py-3 rounded-2xl shadow-md border-2 w-[200px] h-[120px]
         ${colorClass} text-white
         hover:shadow-lg cursor-pointer relative
       `}
@@ -71,7 +77,10 @@ const AutomationNodeComponent: React.FC<Props> = ({ id, data }) => {
       </div>
       
       {/* Settings Icon */}
-      <div className="absolute top-2 right-10">
+      <div 
+        className="absolute top-2 right-10 settings-icon cursor-pointer p-1 rounded hover:bg-black/20 transition-colors"
+        onClick={handleSettingsClick}
+      >
         <Settings className="w-4 h-4 opacity-60 hover:opacity-100 transition-opacity" />
       </div>
       
