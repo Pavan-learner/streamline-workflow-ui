@@ -1,10 +1,19 @@
 
 import React, { useState } from 'react';
 import { useAutomationStore } from '../store/automationStore';
-import { Plus, Download, Upload, Workflow, Zap, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Download, Upload, Workflow, Zap, Settings, ChevronLeft, ChevronRight, Rows, Columns } from 'lucide-react';
+import { Button } from './ui/button';
 
 const Sidebar: React.FC = () => {
-  const { openModal, saveFlow, loadFlow, nodes, edges } = useAutomationStore();
+  const { 
+    openModal, 
+    saveFlow, 
+    loadFlow, 
+    nodes, 
+    edges, 
+    displayMode, 
+    setDisplayMode 
+  } = useAutomationStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [jsonInput, setJsonInput] = useState('');
   const [showJsonInput, setShowJsonInput] = useState(false);
@@ -30,6 +39,7 @@ const Sidebar: React.FC = () => {
 
   const triggerCount = nodes.filter(node => node.data.type === 'trigger').length;
   const actionCount = nodes.filter(node => node.data.type === 'action').length;
+  const activeNodes = nodes.filter(node => node.data.isActive).length;
 
   return (
     <div className={`
@@ -52,6 +62,33 @@ const Sidebar: React.FC = () => {
         </button>
       </div>
 
+      {/* Display Mode Controls */}
+      {!isCollapsed && (
+        <div className="p-4 border-b border-gray-200">
+          <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Layout</h3>
+          <div className="flex space-x-2">
+            <Button
+              onClick={() => setDisplayMode('vertical')}
+              variant={displayMode === 'vertical' ? 'default' : 'outline'}
+              size="sm"
+              className="flex-1 flex items-center space-x-2"
+            >
+              <Rows className="w-4 h-4" />
+              <span>Vertical</span>
+            </Button>
+            <Button
+              onClick={() => setDisplayMode('horizontal')}
+              variant={displayMode === 'horizontal' ? 'default' : 'outline'}
+              size="sm"
+              className="flex-1 flex items-center space-x-2"
+            >
+              <Columns className="w-4 h-4" />
+              <span>Horizontal</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Stats */}
       {!isCollapsed && (
         <div className="p-4 border-b border-gray-200">
@@ -70,6 +107,10 @@ const Sidebar: React.FC = () => {
               </div>
               <div className="text-2xl font-bold text-purple-600 mt-1">{actionCount}</div>
             </div>
+          </div>
+          <div className="bg-green-50 p-3 rounded-lg mt-4">
+            <div className="text-sm font-medium text-green-900">Active Nodes</div>
+            <div className="text-2xl font-bold text-green-600 mt-1">{activeNodes}/{nodes.length}</div>
           </div>
         </div>
       )}
@@ -132,6 +173,7 @@ const Sidebar: React.FC = () => {
               <div className="text-sm text-gray-600 space-y-1">
                 <div>Total Nodes: {nodes.length}</div>
                 <div>Total Connections: {edges.length}</div>
+                <div>Active Nodes: {activeNodes}</div>
               </div>
             </div>
           </>

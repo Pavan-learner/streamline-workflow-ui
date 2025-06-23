@@ -1,5 +1,5 @@
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -24,30 +24,39 @@ const nodeTypes = {
 
 const AutomationBuilder: React.FC = () => {
   const { nodes, edges, setNodes, setEdges, onConnect } = useAutomationStore();
-  const [localNodes, , onNodesChange] = useNodesState(nodes);
-  const [localEdges, , onEdgesChange] = useEdgesState(edges);
+  const [localNodes, setLocalNodes, onNodesChange] = useNodesState([]);
+  const [localEdges, setLocalEdges, onEdgesChange] = useEdgesState([]);
 
-  // Sync local state with store
-  React.useEffect(() => {
+  // Sync store with local state
+  useEffect(() => {
+    setLocalNodes(nodes);
+  }, [nodes, setLocalNodes]);
+
+  useEffect(() => {
+    setLocalEdges(edges);
+  }, [edges, setLocalEdges]);
+
+  // Sync local changes back to store
+  useEffect(() => {
     setNodes(localNodes);
   }, [localNodes, setNodes]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setEdges(localEdges);
   }, [localEdges, setEdges]);
 
   const handleConnect = useCallback(
     (params: Connection) => {
-      const newEdge = addEdge({
+      const newEdges = addEdge({
         ...params,
         type: 'smoothstep',
         animated: true,
         style: { stroke: '#6366f1', strokeWidth: 2 },
       }, localEdges);
-      setEdges(newEdge);
+      setLocalEdges(newEdges);
       onConnect(params);
     },
-    [localEdges, setEdges, onConnect]
+    [localEdges, setLocalEdges, onConnect]
   );
 
   return (
@@ -74,14 +83,17 @@ const AutomationBuilder: React.FC = () => {
           <MiniMap 
             className="bg-white border border-gray-200 rounded-lg shadow-sm"
             nodeColor={(node) => {
-              if (node.data.type === 'trigger') return '#3b82f6';
+              const isActive = node.data?.isActive !== false;
+              const opacity = isActive ? 1 : 0.5;
+              
+              if (node.data.type === 'trigger') return `rgba(59, 130, 246, ${opacity})`;
               switch (node.data.category) {
-                case 'CRM': return '#8b5cf6';
-                case 'Contact': return '#10b981';
-                case 'Calendar': return '#f59e0b';
-                case 'LMS': return '#6366f1';
-                case 'Database': return '#ef4444';
-                default: return '#6b7280';
+                case 'CRM': return `rgba(139, 92, 246, ${opacity})`;
+                case 'Contact': return `rgba(16, 185, 129, ${opacity})`;
+                case 'Calendar': return `rgba(245, 158, 11, ${opacity})`;
+                case 'LMS': return `rgba(99, 102, 241, ${opacity})`;
+                case 'Database': return `rgba(239, 68, 68, ${opacity})`;
+                default: return `rgba(107, 114, 128, ${opacity})`;
               }
             }}
           />

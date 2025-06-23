@@ -22,12 +22,13 @@ const NodeModal: React.FC = () => {
   const handleAddNode = (template: any) => {
     addNode({
       type: 'automation',
-      position: { x: Math.random() * 400 + 100, y: Math.random() * 300 + 100 },
+      position: { x: 0, y: 0 }, // Position will be calculated in the store
       data: {
         label: template.label,
         category: template.category,
         type: template.type,
         description: template.description,
+        isActive: true,
       },
     });
   };
