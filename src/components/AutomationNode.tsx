@@ -97,9 +97,12 @@ const AutomationNodeComponent: React.FC<Props> = ({ id, data }) => {
             {data.description}
           </div>
         )}
-        <div className="text-xs mt-2 opacity-75">
-          Status: {data.isActive ? 'Active' : 'Inactive'}
-        </div>
+        {/* Only show status for non-trigger nodes to avoid visibility issues with blue background */}
+        {data.type !== 'trigger' && (
+          <div className="text-xs mt-2 opacity-75">
+            Status: {data.isActive ? 'Active' : 'Inactive'}
+          </div>
+        )}
       </div>
       
       <Handle
